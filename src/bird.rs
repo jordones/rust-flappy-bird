@@ -10,6 +10,8 @@ impl Plugin for BirdPlugin {
     }
 }
 
+/// ## Bird
+/// Primary player component
 #[derive(Component)]
 struct Bird;
 
@@ -19,6 +21,9 @@ struct BirdBundle {
     sprite: SpriteBundle,
 }
 
+/// Spawns a bird entity
+/// 
+/// Should be run once during scene initialization
 fn spawn_bird(mut commands: Commands, asset_server: Res<AssetServer>) {
     let texture = asset_server.load("bird.png");
 
@@ -32,6 +37,11 @@ fn spawn_bird(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 }
 
+/// Applies a continuous force to the Bird entity
+/// 
+/// It is assumed there will only be one instance of a Bird in the world
+/// 
+/// TODO: handle panic if there is > 1 Bird entity
 fn apply_gravity_to_bird(
     mut query: Query<(&mut Transform, With<Bird>)>,
     time: Res<Time>
