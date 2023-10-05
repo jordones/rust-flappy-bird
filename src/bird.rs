@@ -41,10 +41,10 @@ fn spawn_bird(mut commands: Commands, asset_server: Res<AssetServer>) {
 /// 
 /// It is assumed there will only be one instance of a Bird in the world
 fn apply_gravity_to_bird(
-    mut query: Query<(&mut Transform, With<Bird>)>,
+    mut query: Query<&mut Transform, With<Bird>>,
     time: Res<Time>
 ) {
-    if let Ok((mut bird_transform, _)) = query.get_single_mut() {
+    if let Ok(mut bird_transform) = query.get_single_mut() {
         bird_transform.translation.y -= time.delta_seconds() * 60.0;
     }
 }
