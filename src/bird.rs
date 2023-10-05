@@ -40,13 +40,11 @@ fn spawn_bird(mut commands: Commands, asset_server: Res<AssetServer>) {
 /// Applies a continuous force to the Bird entity
 /// 
 /// It is assumed there will only be one instance of a Bird in the world
-/// 
-/// TODO: handle panic if there is > 1 Bird entity
 fn apply_gravity_to_bird(
     mut query: Query<(&mut Transform, With<Bird>)>,
     time: Res<Time>
 ) {
-    let mut bird_transform = query.single_mut();
-
-    bird_transform.0.translation.y -= time.delta_seconds() * 60.0;
+    if let Ok((mut bird_transform, _)) = query.get_single_mut() {
+        bird_transform.translation.y -= time.delta_seconds() * 60.0;
+    }
 }
