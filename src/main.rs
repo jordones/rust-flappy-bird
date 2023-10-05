@@ -19,6 +19,7 @@ fn main() {
         )
         .add_systems(Startup, setup_camera)
         .add_plugins(bird::BirdPlugin)
+        .add_systems(Update, bevy::window::close_on_esc)
         .run();
 }
 
