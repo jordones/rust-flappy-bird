@@ -1,4 +1,5 @@
 pub mod bird;
+pub mod pipe;
 
 use bevy::{prelude::*, render::camera::ScalingMode};
 
@@ -18,7 +19,7 @@ fn main() {
                 })
         )
         .add_systems(Startup, setup_camera)
-        .add_plugins(bird::BirdPlugin)
+        .add_plugins((bird::BirdPlugin, pipe::PipePlugin))
         .add_systems(Update, bevy::window::close_on_esc)
         .run();
 }
