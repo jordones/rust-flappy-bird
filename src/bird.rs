@@ -6,7 +6,7 @@ impl Plugin for BirdPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Startup, spawn_bird)
-            .add_systems(Update, apply_gravity_to_bird);
+            .add_systems(Update, (apply_gravity_to_bird, handle_input, handle_velocity));
     }
 }
 
@@ -15,9 +15,13 @@ impl Plugin for BirdPlugin {
 #[derive(Component)]
 struct Bird;
 
+#[derive(Component)]
+struct Velocity(Vec2);
+
 #[derive(Bundle)]
 struct BirdBundle {
     marker: Bird,
+    velocity: Velocity,
     sprite: SpriteBundle,
 }
 
@@ -29,6 +33,7 @@ fn spawn_bird(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn(BirdBundle {
         marker: Bird,
+        velocity: Velocity(Vec2 { x: 0.0, y: 0.0 }),
         sprite: SpriteBundle {
             texture,
             ..default()
@@ -45,6 +50,33 @@ fn apply_gravity_to_bird(
     time: Res<Time>
 ) {
     if let Ok(mut bird_transform) = query.get_single_mut() {
-        bird_transform.translation.y -= time.delta_seconds() * 60.0;
+        bird_transform.translation.y -= time.delta_seconds() * 80.0;
+    }
+}
+
+fn handle_input(
+    mut query: Query<&mut Velocity, With<Bird>>,
+    input: Res<Input<KeyCode>>,
+) {
+    if !input.just_pressed(KeyCode::Space) {
+        return;
+    }
+
+    if let Ok(mut velocity) = query.get_single_mut() {
+        velocity.0.y += 80.0;
+    }
+}
+
+fn handle_velocity(
+    mut query: Query<(&mut Transform, &mut Velocity), With<Bird>>,
+    time: Res<Time>
+) {
+    if let Ok((mut transform, mut velocity)) = query.get_single_mut() {
+        if velocity.0.y <= 0.0 {
+            return;
+        }
+
+        transform.translation.y += velocity.0.y * time.delta_seconds();
+        velocity.0.y -= velocity.0.y * time.delta_seconds();
     }
 }
