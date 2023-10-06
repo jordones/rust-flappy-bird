@@ -12,7 +12,7 @@ fn main() {
                     primary_window: Some(Window {
                         title: "Flappy Bird".into(),
                         resizable: false,
-                        resolution: (480.0, 960.0).into(),
+                        resolution: (240.0, 480.0).into(),
                         ..default()
                     }),
                     ..default()
