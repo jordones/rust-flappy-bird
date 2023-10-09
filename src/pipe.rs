@@ -38,8 +38,8 @@ impl PipeSet {
     fn new(asset_server: &Res<AssetServer>, window_resolution: &WindowResolution) -> Self {
         // TODO: Randomize sm/md/lg
         PipeSet {
-            0: PipeBundle::new(ScreenPosition::Bottom, PipeSize::Md, asset_server, window_resolution),
-            1: PipeBundle::new(ScreenPosition::Top, PipeSize::Sm, asset_server, window_resolution),
+            0: PipeBundle::new(ScreenPosition::Bottom, PipeSize::Sm, asset_server, window_resolution),
+            1: PipeBundle::new(ScreenPosition::Top, PipeSize::Md, asset_server, window_resolution),
         }
     }
 }
@@ -58,20 +58,22 @@ impl PipeBundle {
         asset_server: &Res<AssetServer>,
         window_resolution: &WindowResolution
     ) -> Self {
-        let texture = match size {
-            PipeSize::Sm => asset_server.load("pipe_sm.png"),
-            PipeSize::Md => asset_server.load("pipe_md.png"),
-            PipeSize::Lg => asset_server.load("pipe_lg.png"),
+        let texture = asset_server.load("pipe.png");
+
+        let offset = match size {
+            PipeSize::Sm => 0.0,
+            PipeSize::Md => 8.0,
+            PipeSize::Lg => 16.0,
         };
 
         let flip_y = screen_pos != ScreenPosition::Bottom;
-        let x_pos = window_resolution.width() / 4.0 - 8.0;
+        let x_pos = window_resolution.width() / 8.0 - 8.0;
         let y_pos = if flip_y {
             // /2 to match resolution and /2 to fit co-ordinate system
             // -8 is half the texture height (TBD how to get this from the Handle<Image>)
-            window_resolution.height() / 4.0 - 8.0
+            window_resolution.height() / 8.0 - offset
         } else {
-            -window_resolution.height() / 4.0 + 8.0
+            -window_resolution.height() / 8.0 + offset
         };
 
         PipeBundle { 
