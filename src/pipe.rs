@@ -1,3 +1,4 @@
+
 use bevy::{prelude::*, window::WindowResolution};
 
 pub struct PipePlugin;
@@ -5,9 +6,41 @@ pub struct PipePlugin;
 impl Plugin for PipePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, spawn_pipe);
+            .init_resource::<SpawnTimer>()
+            .add_systems(Startup, spawn_pipe)
+            .add_systems(Update, (scroll_pipes, advance_timer, spawn_pipes));
     }
 }
+
+//// Timer impl
+
+#[derive(Resource)]
+pub struct SpawnTimer {
+    pub timer: Timer,
+}
+
+impl SpawnTimer {
+    fn new() -> Self {
+        SpawnTimer {
+            timer: Timer::from_seconds(1.5, TimerMode::Repeating)
+        }
+    }
+}
+
+impl Default for SpawnTimer {
+    fn default() -> Self {
+        SpawnTimer::new()
+    }
+}
+
+fn advance_timer(
+    time: Res<Time>,
+    mut spawnTimer: ResMut<SpawnTimer>
+) {
+    spawnTimer.timer.tick(time.delta());
+}
+
+//// End timer impl
 
 #[derive(Component, PartialEq)]
 enum ScreenPosition {
@@ -67,9 +100,9 @@ impl PipeBundle {
         };
 
         let flip_y = screen_pos != ScreenPosition::Bottom;
-        let x_pos = window_resolution.width() / 8.0 - 8.0;
+        let x_pos = window_resolution.width() / 8.0 + 8.0;
         let y_pos = if flip_y {
-            // /2 to match resolution and /2 to fit co-ordinate system
+            // /8 to match resolution and /8 to fit co-ordinate system
             // -8 is half the texture height (TBD how to get this from the Handle<Image>)
             window_resolution.height() / 8.0 - offset
         } else {
@@ -111,4 +144,32 @@ fn spawn_pipe(
 
     commands.spawn(x.0);
     commands.spawn(x.1);
+}
+
+fn scroll_pipes(
+    mut query: Query<&mut Transform, With<Pipe>>,
+    time: Res<Time>
+) {
+    for mut pipe_transform in query.iter_mut() {
+        pipe_transform.translation.x -= time.delta_seconds() * 16.0;
+    }
+}
+
+fn spawn_pipes(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    query: Query<&Window>,
+    spawn_timer: ResMut<SpawnTimer>
+
+) {
+    if spawn_timer.timer.finished() {
+        info!("finished timer");
+        let window = query.single();
+
+        // Temp: Spawning in a test PipeSet
+        let x = PipeSet::new(&asset_server, &window.resolution);
+    
+        commands.spawn(x.0);
+        commands.spawn(x.1);
+    }
 }
