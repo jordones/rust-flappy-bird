@@ -1,5 +1,6 @@
 
 use bevy::{prelude::*, window::WindowResolution};
+use rand::{self, Rng};
 
 pub struct PipePlugin;
 
@@ -35,9 +36,9 @@ impl Default for SpawnTimer {
 
 fn advance_timer(
     time: Res<Time>,
-    mut spawnTimer: ResMut<SpawnTimer>
+    mut spawn_timer: ResMut<SpawnTimer>
 ) {
-    spawnTimer.timer.tick(time.delta());
+    spawn_timer.timer.tick(time.delta());
 }
 
 //// End timer impl
@@ -55,6 +56,7 @@ enum PipeSize {
     Lg
 }
 
+
 #[derive(Component)]
 struct PipeParent {
     pipes: Vec<PipeSet>,
@@ -69,11 +71,27 @@ struct PipeSet(PipeBundle, PipeBundle);
 
 impl PipeSet {
     fn new(asset_server: &Res<AssetServer>, window_resolution: &WindowResolution) -> Self {
-        // TODO: Randomize sm/md/lg
         PipeSet {
-            0: PipeBundle::new(ScreenPosition::Bottom, PipeSize::Sm, asset_server, window_resolution),
-            1: PipeBundle::new(ScreenPosition::Top, PipeSize::Md, asset_server, window_resolution),
+            0: PipeBundle::new(ScreenPosition::Bottom, get_rand_pipe_size(), asset_server, window_resolution),
+            1: PipeBundle::new(ScreenPosition::Top, get_rand_pipe_size(), asset_server, window_resolution),
         }
+    }
+}
+
+fn get_rand_pipe_size() -> PipeSize {
+    let rand_val = rand::thread_rng().gen_range(0, 3);
+    rand_to_pipe_size(rand_val)
+}
+
+fn rand_to_pipe_size(rand_int: i32) -> PipeSize {
+    if rand_int == 0 {
+        PipeSize::Sm
+    }
+    else if rand_int == 1 {
+        PipeSize::Md
+    }
+    else {
+        PipeSize::Lg
     }
 }
 
