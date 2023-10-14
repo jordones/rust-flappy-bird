@@ -9,7 +9,7 @@ impl Plugin for PipePlugin {
         app
             .init_resource::<SpawnTimer>()
             .add_systems(Startup, spawn_pipe)
-            .add_systems(Update, (scroll_pipes, advance_timer, spawn_pipes));
+            .add_systems(Update, (scroll_pipes, advance_timer, spawn_pipes, despawn_pipes));
     }
 }
 
@@ -189,5 +189,18 @@ fn spawn_pipes(
     
         commands.spawn(x.0);
         commands.spawn(x.1);
+    }
+}
+
+fn despawn_pipes(
+    mut commands: Commands,
+    query: Query<(Entity, &Transform), With<Pipe>>,
+    window_query: Query<&Window>
+) {
+    let window_width = -window_query.single().width() / 8.0 - 8.0;
+    for (entity, transform) in query.iter() {
+        if transform.translation.x < window_width {
+            commands.entity(entity).despawn();
+        }
     }
 }
